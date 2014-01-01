@@ -122,6 +122,7 @@
 		E24E773318730CFF007C13FC /* vector_query.inl in Resources */ = {isa = PBXBuildFile; fileRef = E24E76C918730CFF007C13FC /* vector_query.inl */; };
 		E24E773418730CFF007C13FC /* verbose_operator.inl in Resources */ = {isa = PBXBuildFile; fileRef = E24E76CB18730CFF007C13FC /* verbose_operator.inl */; };
 		E24E773518730CFF007C13FC /* wrap.inl in Resources */ = {isa = PBXBuildFile; fileRef = E24E76CD18730CFF007C13FC /* wrap.inl */; };
+		E270E4971874330B007B7BC0 /* Arial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E270E4961874330B007B7BC0 /* Arial.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -379,6 +380,7 @@
 		E24E76CC18730CFF007C13FC /* wrap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = wrap.hpp; sourceTree = "<group>"; };
 		E24E76CD18730CFF007C13FC /* wrap.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = wrap.inl; sourceTree = "<group>"; };
 		E24E76CF18730CFF007C13FC /* xstream.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = xstream.hpp; sourceTree = "<group>"; };
+		E270E4961874330B007B7BC0 /* Arial.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Arial.ttf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,6 +438,7 @@
 		E24E75A7187307CE007C13FC /* Pong */ = {
 			isa = PBXGroup;
 			children = (
+				E270E4951874330B007B7BC0 /* assets */,
 				E24E75E018730992007C13FC /* src */,
 				E24E75B9187307CE007C13FC /* Images.xcassets */,
 				E24E75A8187307CE007C13FC /* Supporting Files */,
@@ -757,6 +760,14 @@
 			path = virtrev;
 			sourceTree = "<group>";
 		};
+		E270E4951874330B007B7BC0 /* assets */ = {
+			isa = PBXGroup;
+			children = (
+				E270E4961874330B007B7BC0 /* Arial.ttf */,
+			);
+			path = assets;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -932,6 +943,7 @@
 				E24E771218730CFF007C13FC /* intersect.inl in Resources */,
 				E24E76D218730CFF007C13FC /* func_exponential.inl in Resources */,
 				E24E76EC18730CFF007C13FC /* type_vec.inl in Resources */,
+				E270E4971874330B007B7BC0 /* Arial.ttf in Resources */,
 				E24E76ED18730CFF007C13FC /* type_vec1.inl in Resources */,
 				E24E770418730CFF007C13FC /* color_space_YCoCg.inl in Resources */,
 				E24E770D18730CFF007C13FC /* gradient_paint.inl in Resources */,
@@ -1171,6 +1183,7 @@
 				E24E75D1187307CE007C13FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		E24E75D2187307CE007C13FC /* Build configuration list for PBXNativeTarget "PongTests" */ = {
 			isa = XCConfigurationList;
@@ -1179,6 +1192,7 @@
 				E24E75D4187307CE007C13FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

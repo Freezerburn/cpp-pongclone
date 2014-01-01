@@ -45,7 +45,17 @@ Entity *player;
 Entity *computer;
 Entity *ball;
 Entity *leftWall, *rightWall;
-std::vector<Entity*> scorePlayer, scoreComputer;
+Entity *scorePlayer, *scoreComputer;
+
+SDL_Rect entityToRect(Entity *e) {
+    SDL_Rect rect{
+        static_cast<int>(glm::round(e->position.x)),
+        static_cast<int>(glm::round(e->position.y)),
+        static_cast<int>(glm::round(e->size.x)),
+        static_cast<int>(glm::round(e->size.y))
+    };
+    return rect;
+}
 
 void initSDL() {
     int err = SDL_Init(SDL_INIT_EVERYTHING);
@@ -89,7 +99,26 @@ void initResources() {
     amask = 0xff000000;
 #endif
     
-    gameFont = TTF_OpenFont("Arial", 12);
+    gameFont = TTF_OpenFont("Arial.ttf", 52);
+    if(!gameFont) {
+        std::cout << "Could not open font: " << TTF_GetError() << std::endl;
+        exit(1);
+    }
+    
+    SDL_Color fontFg;
+    fontFg.r = 255;
+    fontFg.g = 255;
+    fontFg.b = 255;
+    fontFg.a = 255;
+    
+    int w, h;
+    scorePlayer = new Entity();
+    scorePlayer->position.x = SCORE_SIZE / 10.0;
+    scorePlayer->position.y = SIMULATE_HEIGHT - (SCORE_SIZE + SCORE_SIZE / 10.0);
+    TTF_SizeText(gameFont, "0", &w, &h);
+    scorePlayer->size.x = w;
+    scorePlayer->size.y = h;
+    scorePlayer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, "0", fontFg)));
 
     SDL_Surface *paddleSurf = SDL_CreateRGBSurface(0, PADDLE_WIDTH, PADDLE_HEIGHT, 32, rmask, gmask, bmask, amask);
     SDL_FillRect(paddleSurf, NULL, 0xffffffff);
@@ -120,6 +149,8 @@ void initResources() {
     ball->position.y = SIMULATE_HEIGHT / 2.0 - BALL_SIZE / 2.0;
     ball->size.x = BALL_SIZE;
     ball->size.y = BALL_SIZE;
+    ball->velocity.x = 175.0;
+    ball->velocity.y = 75.0;
     
     leftWall = new Entity();
     leftWall->toRender = ballTex;
@@ -192,6 +223,49 @@ void tickComputer() {
     computer->position.y += computer->velocity.y * TICK_RATE;
 }
 
+void tickBall() {
+    ball->position.x += ball->velocity.x * TICK_RATE;
+    ball->position.y += ball->velocity.y * TICK_RATE;
+    
+    SDL_Rect ballRect = entityToRect(ball);
+    SDL_Rect leftWallRect = entityToRect(leftWall);
+    SDL_Rect rightWallRect = entityToRect(rightWall);
+    SDL_Rect playerRect = entityToRect(player);
+    SDL_Rect computerRect = entityToRect(computer);
+    SDL_Rect result;
+    
+    if(SDL_IntersectRect(&ballRect, &leftWallRect, &result)) {
+//        std::cout << "left" << std::endl;
+//        std::cout << "x: " << result.x << std::endl;
+//        std::cout << "y: " << result.y << std::endl;
+//        std::cout << "w: " << result.w << std::endl;
+//        std::cout << "h: " << result.h << std::endl << std::endl;
+        ball->velocity.x = -ball->velocity.x;
+    }
+    else if(SDL_IntersectRect(&ballRect, &rightWallRect, &result)) {
+//        std::cout << "right" << std::endl;
+//        std::cout << "x: " << result.x << std::endl;
+//        std::cout << "y: " << result.y << std::endl;
+//        std::cout << "w: " << result.w << std::endl;
+//        std::cout << "h: " << result.h << std::endl << std::endl;
+        ball->velocity.x = -ball->velocity.x;
+    }
+    else if(SDL_IntersectRect(&ballRect, &playerRect, &result)) {
+        ball->velocity.y = -ball->velocity.y;
+    }
+    else if(SDL_IntersectRect(&ballRect, &computerRect, &result)) {
+        ball->velocity.y = -ball->velocity.y;
+    }
+    else if(ball->position.y < 0) {
+        ball->position.x = SIMULATE_WIDTH / 2.0 - BALL_SIZE / 2.0;
+        ball->position.y = SIMULATE_HEIGHT / 2.0 - BALL_SIZE / 2.0;
+    }
+    else if(ball->position.y - ball->size.y > SIMULATE_HEIGHT) {
+        ball->position.x = SIMULATE_WIDTH / 2.0 - BALL_SIZE / 2.0;
+        ball->position.y = SIMULATE_HEIGHT / 2.0 - BALL_SIZE / 2.0;
+    }
+}
+
 void gameloop() {
     SDL_Event e;
     Uint32 cur_time = SDL_GetTicks();
@@ -210,6 +284,7 @@ void gameloop() {
             delta -= TICK_RATE;
             tickPlayer();
             tickComputer();
+            tickBall();
         }
         
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -219,12 +294,8 @@ void gameloop() {
         ball->render();
         leftWall->render();
         rightWall->render();
-        for(auto e : scorePlayer) {
-            e->render();
-        }
-        for(auto e : scoreComputer) {
-            e->render();
-        }
+        scorePlayer->render();
+//        scoreComputer->render();
         SDL_RenderPresent(renderer);
         
         Uint32 frame_delta = SDL_GetTicks() - start;
