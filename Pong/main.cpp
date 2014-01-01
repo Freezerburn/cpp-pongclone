@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Unlocked Doors. All rights reserved.
 //
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 
@@ -45,6 +46,7 @@ Entity *player;
 Entity *computer;
 Entity *ball;
 Entity *leftWall, *rightWall;
+unsigned int currentScorePlayer, currentScoreComputer;
 Entity *scorePlayer, *scoreComputer;
 
 SDL_Rect entityToRect(Entity *e) {
@@ -110,15 +112,25 @@ void initResources() {
     fontFg.g = 255;
     fontFg.b = 255;
     fontFg.a = 255;
+    currentScorePlayer = 0;
+    currentScoreComputer = 0;
     
     int w, h;
     scorePlayer = new Entity();
     scorePlayer->position.x = SCORE_SIZE / 10.0;
     scorePlayer->position.y = SIMULATE_HEIGHT - (SCORE_SIZE + SCORE_SIZE / 10.0);
-    TTF_SizeText(gameFont, "0", &w, &h);
+    TTF_SizeText(gameFont, std::to_string(currentScorePlayer).c_str(), &w, &h);
     scorePlayer->size.x = w;
     scorePlayer->size.y = h;
-    scorePlayer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, "0", fontFg)));
+    scorePlayer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, std::to_string(currentScorePlayer).c_str(), fontFg)));
+    
+    scoreComputer = new Entity();
+    TTF_SizeText(gameFont, std::to_string(currentScoreComputer).c_str(), &w, &h);
+    scoreComputer->position.x = SIMULATE_WIDTH - (SCORE_SIZE / 10.0 + w);
+    scoreComputer->position.y = SCORE_SIZE / 10.0;
+    scoreComputer->size.x = w;
+    scoreComputer->size.y = h;
+    scoreComputer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, std::to_string(currentScoreComputer).c_str(), fontFg)));
 
     SDL_Surface *paddleSurf = SDL_CreateRGBSurface(0, PADDLE_WIDTH, PADDLE_HEIGHT, 32, rmask, gmask, bmask, amask);
     SDL_FillRect(paddleSurf, NULL, 0xffffffff);
@@ -223,6 +235,10 @@ void tickComputer() {
     computer->position.y += computer->velocity.y * TICK_RATE;
 }
 
+double max(double first, double second) {
+    return first > second ? first : second;
+}
+
 void tickBall() {
     ball->position.x += ball->velocity.x * TICK_RATE;
     ball->position.y += ball->velocity.y * TICK_RATE;
@@ -259,10 +275,38 @@ void tickBall() {
     else if(ball->position.y < 0) {
         ball->position.x = SIMULATE_WIDTH / 2.0 - BALL_SIZE / 2.0;
         ball->position.y = SIMULATE_HEIGHT / 2.0 - BALL_SIZE / 2.0;
+        ball->velocity.x = rand() % (75 * 2);
+        ball->velocity.y = max((75 * 2) - ball->velocity.x, 75);
+        delete scorePlayer->toRender;
+        currentScorePlayer++;
+        SDL_Color fg;
+        int w, h;
+        fg.r = 255;
+        fg.g = 255;
+        fg.b = 255;
+        fg.a = 255;
+        TTF_SizeText(gameFont, std::to_string(currentScorePlayer).c_str(), &w, &h);
+        scorePlayer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, std::to_string(currentScorePlayer).c_str(), fg)));
+        scorePlayer->size.x = w;
+        scorePlayer->size.y = h;
     }
     else if(ball->position.y - ball->size.y > SIMULATE_HEIGHT) {
         ball->position.x = SIMULATE_WIDTH / 2.0 - BALL_SIZE / 2.0;
         ball->position.y = SIMULATE_HEIGHT / 2.0 - BALL_SIZE / 2.0;
+        ball->velocity.x = rand() % 75 * (rand() % 2 == 1 ? -1 : 1);
+        ball->velocity.y = max((75 * 2) - ball->velocity.x, 75) * (rand() % 2 == 1 ? -1 : 1);
+        delete scoreComputer->toRender;
+        currentScoreComputer++;
+        SDL_Color fg;
+        int w, h;
+        fg.r = 255;
+        fg.g = 255;
+        fg.b = 255;
+        fg.a = 255;
+        TTF_SizeText(gameFont, std::to_string(currentScoreComputer).c_str(), &w, &h);
+        scoreComputer->toRender = new ud::Texture(std::make_shared<ud::Surface>(TTF_RenderText_Blended(gameFont, std::to_string(currentScoreComputer).c_str(), fg)));
+        scoreComputer->size.x = w;
+        scoreComputer->size.y = h;
     }
 }
 
@@ -295,7 +339,7 @@ void gameloop() {
         leftWall->render();
         rightWall->render();
         scorePlayer->render();
-//        scoreComputer->render();
+        scoreComputer->render();
         SDL_RenderPresent(renderer);
         
         Uint32 frame_delta = SDL_GetTicks() - start;
