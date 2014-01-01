@@ -233,6 +233,13 @@ void handleEventPlayer(SDL_Event *e) {
 void tickPlayer() {
     player->position.x += player->velocity.x * TICK_RATE;
     player->position.y += player->velocity.y * TICK_RATE;
+    
+    if(player->position.x < leftWall->position.x + leftWall->size.x) {
+        player->position.x = leftWall->position.x + leftWall->size.x;
+    }
+    if(player->position.x + player->size.x > rightWall->position.x) {
+        player->position.x = rightWall->position.x - player->size.x;
+    }
 }
 
 void tickComputer() {
