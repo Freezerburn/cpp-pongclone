@@ -37,6 +37,11 @@ public:
 };
 
 static const double PLAYER_VELOCITY = 150;
+static const unsigned DIFFICULTY_EASIEST = 0;
+static const unsigned DIFFICULTY_EASY = 1;
+static const unsigned DIFFICULTY_NORMAL = 2;
+static const unsigned DIFFICULTY_HARD = 3;
+static const unsigned DIFFICULTY = DIFFICULTY_HARD;
 
 ud::Texture *paddleTex;
 ud::Texture *ballTex;
@@ -267,10 +272,34 @@ void tickBall() {
         ball->velocity.x = -ball->velocity.x;
     }
     else if(SDL_IntersectRect(&ballRect, &playerRect, &result)) {
-        ball->velocity.y = -ball->velocity.y;
+        double paddleMiddle = player->position.x + player->size.x / 2.0;
+        double ballMiddle = ball->position.x + ball->size.x / 2.0;
+        // Note the order here. If the ball is to the right of the paddle middle, then
+        // the delta will be positive. To the left, negative. This gives us the direction
+        // to set the x velocity without doing anything further.
+        double delta = ballMiddle - paddleMiddle;
+        // Basically we want this ratio to indicate how much "speed" should go into the y
+        // direction. If the ball is perfectly centered on the paddle, there should be no
+        // x velocity.
+        // If we have a hypothetical paddle of width 10, and the ball center is 1 pixel to
+        // the right of the paddle center, we basically get:
+        //    yRatio = 1 - (1 / (10 / 2)) = 1 - (1 / 5) = 1 - 0.2 = 0.8
+        // which looks to be the correct ratio we want.
+        double yRatio = 1 - (abs(delta) / (player->size.x / 2.0));
+        yRatio = max(yRatio, 0.35);
+        double totalSpeed = abs(ball->velocity.x) + abs(ball->velocity.y) + 10.0;
+        ball->velocity.x = (1 - yRatio) * totalSpeed * (delta < 0 ? -1 : 1);
+        ball->velocity.y = -yRatio * totalSpeed;
     }
     else if(SDL_IntersectRect(&ballRect, &computerRect, &result)) {
-        ball->velocity.y = -ball->velocity.y;
+        double paddleMiddle = computer->position.x + computer->size.x / 2.0;
+        double ballMiddle = ball->position.x + ball->size.x / 2.0;
+        double delta = ballMiddle - paddleMiddle;
+        double yRatio = 1 - (abs(delta) / (computer->size.x / 2.0));
+        yRatio = max(yRatio, 0.35);
+        double totalSpeed = abs(ball->velocity.x) + abs(ball->velocity.y) + 10.0;
+        ball->velocity.x = (1 - yRatio) * totalSpeed * (delta < 0 ? -1 : 1);
+        ball->velocity.y = yRatio * totalSpeed;
     }
     else if(ball->position.y < 0) {
         ball->position.x = SIMULATE_WIDTH / 2.0 - BALL_SIZE / 2.0;
