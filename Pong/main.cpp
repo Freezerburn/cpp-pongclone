@@ -236,8 +236,38 @@ void tickPlayer() {
 }
 
 void tickComputer() {
+    if(DIFFICULTY == DIFFICULTY_EASIEST) {
+    }
+    else if(DIFFICULTY == DIFFICULTY_EASY) {
+    }
+    else if(DIFFICULTY == DIFFICULTY_NORMAL) {
+    }
+    else if(DIFFICULTY == DIFFICULTY_HARD) {
+        double ballMiddleY = ball->position.y + ball->size.y / 2.0;
+        if(ballMiddleY < SIMULATE_HEIGHT / 2.0) {
+            double ballMiddleX = ball->position.x + ball->size.x / 2.0;
+            double computerMiddleX = computer->position.x + computer->size.x / 2.0;
+            double delta = abs(computerMiddleX - ballMiddleX);
+            if(delta > computer->size.x - computer->size.x / 3.0) {
+                if(computerMiddleX < ballMiddleX) {
+                    computer->velocity.x = 500;
+                }
+                else {
+                    computer->velocity.x = -500;
+                }
+            }
+        }
+    }
+    
     computer->position.x += computer->velocity.x * TICK_RATE;
     computer->position.y += computer->velocity.y * TICK_RATE;
+    
+    if(computer->position.x < leftWall->position.x + leftWall->size.x) {
+        computer->position.x = leftWall->position.x + leftWall->size.x;
+    }
+    if(computer->position.x + computer->size.x > rightWall->position.x) {
+        computer->position.x = rightWall->position.x - computer->size.x;
+    }
 }
 
 double max(double first, double second) {
